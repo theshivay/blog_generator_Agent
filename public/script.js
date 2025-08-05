@@ -9,6 +9,7 @@ class AIAgentUI {
         this.checkServerStatus();
         this.updateSessionInfo();
         this.setupTextareaAutoResize();
+        this.initializeTheme();
     }
 
     initializeElements() {
@@ -26,6 +27,8 @@ class AIAgentUI {
         this.tokenUsageElement = document.getElementById('tokenUsage');
         this.pluginsUsedElement = document.getElementById('pluginsUsed');
         this.sourcesUsedElement = document.getElementById('sourcesUsed');
+        this.themeToggle = document.getElementById('themeToggle');
+        this.themeIcon = document.getElementById('themeIcon');
     }
 
     attachEventListeners() {
@@ -49,6 +52,9 @@ class AIAgentUI {
         // Clear chat
         this.clearChatButton.addEventListener('click', () => this.clearChat());
 
+        // Theme toggle
+        this.themeToggle.addEventListener('click', () => this.toggleTheme());
+
         // Example queries
         document.addEventListener('click', (e) => {
             if (e.target.closest('.example-card')) {
@@ -69,6 +75,35 @@ class AIAgentUI {
                 this.testEndpoint(endpoint);
             }
         });
+    }
+
+    initializeTheme() {
+        // Check for saved theme preference or default to light mode
+        const savedTheme = localStorage.getItem('ai-agent-theme') || 'light';
+        this.setTheme(savedTheme);
+    }
+
+    toggleTheme() {
+        const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+        const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+        this.setTheme(newTheme);
+    }
+
+    setTheme(theme) {
+        document.documentElement.setAttribute('data-theme', theme);
+        localStorage.setItem('ai-agent-theme', theme);
+        
+        // Update theme icon
+        this.themeIcon.textContent = theme === 'light' ? '🌙' : '☀️';
+        
+        // Update theme toggle title
+        this.themeToggle.title = `Switch to ${theme === 'light' ? 'dark' : 'light'} theme`;
+        
+        // Add smooth transition class temporarily
+        document.documentElement.style.transition = 'all 0.3s ease';
+        setTimeout(() => {
+            document.documentElement.style.transition = '';
+        }, 300);
     }
 
     setupTextareaAutoResize() {
