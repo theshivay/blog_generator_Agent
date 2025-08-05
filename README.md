@@ -32,15 +32,15 @@ A sophisticated TypeScript-based AI Agent backend system built with RAG (Retriev
 
 ### 1. Clone and Install
 ```bash
-git clone <repository-url>
-cd ai-agent-server
+git clone https://github.com/theshivay/blog_generator_Agent.git
+cd blog_generator_Agent
 npm install
 ```
 
 ### 2. Environment Setup
 Create a `.env` file from the example:
 ```bash
-cp .env.example .env
+cp .env
 ```
 
 Edit `.env` and add your API key:
@@ -132,11 +132,111 @@ Clear conversation history for a session.
 ### Dual-Service LLM Architecture
 The system uses a sophisticated dual-service approach:
 - **Groq (llama3-70b-8192)**: Handles chat completions and conversational AI
-- **Gemini (text-embedding-ada-002)**: Manages embeddings for RAG functionality
+- **Gemini (embedding-001)**: Manages embeddings for RAG functionality
 
 This architecture provides optimal performance by using each provider's strengths:
 - Groq's fast inference for real-time conversations
 - Gemini's high-quality embeddings for semantic search
+
+### System Architecture Overview
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                        AI Agent Server                          │
+│                     (TypeScript + Express)                      │
+└─────────────────────────────────────────────────────────────────┘
+                                │
+                                ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                      AgentService                               │
+│                   (Main Orchestrator)                           │
+└─────────────────────────────────────────────────────────────────┘
+                                │
+                ┌───────────────┼───────────────┐
+                ▼               ▼               ▼
+┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐
+│   LLMService    │  │   RAGService    │  │ MemoryService   │
+│                 │  │                 │  │                 │
+│ • Groq Chat     │  │ • Embeddings    │  │ • Sessions      │
+│ • Gemini Embed  │  │ • Vector Search │  │ • History       │
+└─────────────────┘  └─────────────────┘  └─────────────────┘
+                                │
+                                ▼
+                    ┌─────────────────┐
+                    │  PluginService  │
+                    │                 │
+                    │ • Math Plugin   │
+                    │ • Weather Plugin│
+                    └─────────────────┘
+
+### Data Flow Architecture
+
+User Request ─────┐
+                  ▼
+        ┌─────────────────┐
+        │ Express Router  │
+        └─────────────────┘
+                  │
+                  ▼
+        ┌─────────────────┐
+        │  AgentService   │ ◄─── Session Memory
+        └─────────────────┘
+                  │
+        ┌─────────┼─────────┐
+        ▼         ▼         ▼
+  ┌─────────┐ ┌─────────┐ ┌─────────┐
+  │ Plugins │ │   RAG   │ │   LLM   │
+  └─────────┘ └─────────┘ └─────────┘
+        │         │         │
+        ▼         ▼         ▼
+  ┌─────────┐ ┌─────────┐ ┌─────────┐
+  │  Math   │ │ Gemini  │ │  Groq   │
+  │Weather  │ │Embedding│ │ Chat    │
+  └─────────┘ └─────────┘ └─────────┘
+                  │
+                  ▼
+        ┌─────────────────┐
+        │ Aggregated      │
+        │ Response        │
+        └─────────────────┘
+                  │
+                  ▼
+              JSON Response
+```
+
+### Technology Stack Visualization
+
+```
+Frontend/Client
+    │
+    ▼ HTTP/REST API
+┌──────────────────┐
+│   Express.js     │ ← Web Framework
+└──────────────────┘
+    │
+    ▼
+┌──────────────────┐
+│   TypeScript     │ ← Programming Language
+└──────────────────┘
+    │
+    ▼
+┌──────────────────┐
+│ Service Layer    │ ← Business Logic
+│ • Agent          │
+│ • LLM            │
+│ • RAG            │
+│ • Memory         │
+│ • Plugins        │
+└──────────────────┘
+    │
+    ▼
+┌──────────────────┐
+│ External APIs    │ ← AI Providers
+│ • Groq           │
+│ • Gemini         │
+│ • Weather        │
+└──────────────────┘
+```
 
 ### Service Layer
 ```
@@ -149,6 +249,32 @@ This architecture provides optimal performance by using each provider's strength
 │   MemoryService │  ← Session management ✅
 │   PluginService │  ← Plugin orchestration ✅
 └─────────────────┘
+```
+
+### Data Flow Diagram
+```mermaid
+graph TD
+    A[User Request] --> B[Express Server]
+    B --> C[AgentService]
+    C --> D[Memory Service]
+    C --> E[Plugin Service]
+    C --> F[RAG Service]
+    C --> G[LLM Service]
+    
+    D --> D1[Session History]
+    E --> E1[Math Plugin]
+    E --> E2[Weather Plugin]
+    F --> F1[Gemini Embeddings]
+    F --> F2[Vector Search]
+    G --> G1[Groq Chat Completion]
+    
+    G1 --> H[AI Response]
+    F2 --> H
+    E1 --> H
+    E2 --> H
+    D1 --> H
+    H --> I[JSON Response]
+    I --> A
 ```
 
 ### Plugin System
@@ -250,7 +376,7 @@ src/
 │   ├── RAGService.ts      # Vector search and retrieval ✅
 │   ├── MemoryService.ts   # Session and conversation management ✅
 │   ├── PluginService.ts   # Plugin orchestration ✅
-│   └── AgentService.ts    # Main orchestrator (being refactored)
+│   └── AgentService.ts    # Main orchestrator ✅
 ├── plugins/            # Plugin implementations
 │   ├── BasePlugin.ts      # Abstract plugin base class ✅
 │   ├── WeatherPlugin.ts   # Weather information plugin ✅
@@ -263,7 +389,7 @@ src/
 │   ├── logger.ts         # Logging configuration ✅
 │   ├── vectorUtils.ts    # Vector operations ✅
 │   └── textUtils.ts      # Text processing ✅
-├── server.ts           # Express server setup ✅
+├── server.ts           # Alternative server setup ✅
 └── index.ts            # Application entry point ✅
 ```
 
@@ -380,8 +506,8 @@ To get started quickly:
 
 2. **Set up environment**:
    ```bash
-   cp .env.example .env
-   # Add your API key to .env
+   cp .env
+   # Add your API keys to .env
    ```
 
 3. **Start the server**:
@@ -419,318 +545,3 @@ MIT License - feel free to use this as a starting point for your own AI agent pr
 ---
 
 **Built with TypeScript, Express.js, and modern AI technologies. Powered by Groq and Gemini APIs for optimal performance and reliability.**
-
-## 🚀 Features
-
-- **AI Agent Core**: Conversational AI with session-based memory
-- **RAG System**: Retrieval-Augmented Generation with vector similarity search
-- **Plugin System**: Extensible plugin architecture with Weather and Math plugins
-- **Custom Prompt Engineering**: Context-aware prompts with memory and retrieved content
-- **TypeScript**: Fully typed codebase for reliability and maintainability
-- **RESTful API**: Clean endpoints for agent interactions
-
-## 🏗️ Architecture
-
-```
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   User Request  │───▶│  Agent Core     │───▶│  LLM Response   │
-│   + Session ID  │    │   + Memory      │    │                 │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
-                              │
-                              ▼
-                    ┌─────────────────┐
-                    │  Intent Parser  │
-                    │  & Orchestrator │
-                    └─────────────────┘
-                              │
-                    ┌─────────┴─────────┐
-                    ▼                   ▼
-            ┌──────────────┐    ┌──────────────┐
-            │ Plugin System│    │ RAG System   │
-            │              │    │              │
-            │ • Weather    │    │ • Embedding  │
-            │ • Math Eval  │    │ • Vector DB  │
-            │ • Extensible │    │ • Retrieval  │
-            └──────────────┘    └──────────────┘
-```
-
-## 📋 Prerequisites
-
-- Node.js 18+ 
-- npm or yarn
-- API keys for your chosen LLM provider
-- (Optional) Weather API key for weather plugin
-
-## 🛠️ Setup Instructions
-
-### 1. Clone and Install
-
-```bash
-# Install dependencies
-npm install
-
-# Copy environment template
-cp .env.example .env
-```
-
-### 2. Configure Environment Variables
-
-Edit `.env` file with your API keys:
-
-```env
-# Required: Choose your LLM provider
-GROQ_API_KEY=your_groq_api_key_here
-GEMINI_API_KEY=your_gemini_api_key_here
-
-# Optional: For weather plugin
-WEATHER_API_KEY=your_openweather_api_key
-```
-
-### 3. Prepare Vector Database
-
-```bash
-# Process markdown files and create embeddings
-npm run prepare-vectors
-```
-
-### 4. Start Development Server
-
-```bash
-# Development with hot reload
-npm run dev
-
-# Production build and start
-npm run build
-npm start
-```
-
-## 📡 API Endpoints
-
-### Chat with Agent
-
-```http
-POST /api/agent/message
-Content-Type: application/json
-
-{
-  "message": "What is markdown and how do I use it for blogging?",
-  "session_id": "user-session-123"
-}
-```
-
-**Response:**
-```json
-{
-  "success": true,
-  "data": {
-    "response": "Based on the documentation I have access to...",
-    "session_id": "user-session-123",
-    "plugins_used": [],
-    "sources_used": [
-      {
-        "filename": "daext-blogging-with-markdown-complete-guide.md",
-        "relevance_score": 0.89,
-        "chunk": "Markdown is a lightweight markup language..."
-      }
-    ]
-  }
-}
-```
-
-### Health Check
-
-```http
-GET /api/health
-```
-
-### Get Session History
-
-```http
-GET /api/agent/sessions/:session_id/history
-```
-
-## 🔌 Plugin Examples
-
-### Weather Plugin
-
-```
-User: "What's the weather like in New York?"
-Response: Uses Weather API to get current conditions
-```
-
-### Math Plugin
-
-```
-User: "Calculate 15 * 8 + 32 / 4"  
-Response: "The result is 128"
-```
-
-## 🧠 RAG Knowledge Base
-
-The system includes comprehensive documentation about:
-
-- **Markdown Blogging**: Complete guide to blogging with Markdown
-- **Custom Blog Building**: Tutorial on building custom markdown blogs
-- **Next.js + React Markdown**: Technical implementation guide
-- **LLM-Friendly Content**: Optimizing content for AI processing
-- **Lightweight Markup Languages**: Comprehensive reference
-- **AI Agent Systems**: Technical documentation
-
-## 🎯 Key Features Explained
-
-### 1. Session Memory
-- Maintains conversation context per session
-- Configurable history length
-- Automatic cleanup of old sessions
-
-### 2. RAG (Retrieval-Augmented Generation)
-- Vector similarity search using cosine similarity
-- Embedding-based content retrieval
-- Context injection into LLM prompts
-
-### 3. Plugin System
-- Intent-based plugin activation
-- Extensible plugin architecture
-- Result integration with LLM responses
-
-### 4. Custom Prompt Engineering
-- System instructions for agent behavior
-- Memory summary integration
-- Retrieved context formatting
-- Plugin result incorporation
-
-## 🔧 Development Commands
-
-```bash
-# Development
-npm run dev              # Start development server
-npm run build           # Build for production
-npm run start           # Start production server
-
-# Utilities
-npm run prepare-vectors # Process markdown files
-npm run lint           # Run ESLint
-npm run test           # Run tests
-
-# Deployment
-npm run build && npm start
-```
-
-## 📁 Project Structure
-
-```
-src/
-├── index.ts                 # Application entry point
-├── server.ts               # Express server setup
-├── routes/                 # API route handlers
-│   ├── agent.ts           # Agent endpoints
-│   └── health.ts          # Health check
-├── services/              # Core business logic
-│   ├── AgentService.ts    # Main agent orchestration
-│   ├── LLMService.ts      # LLM provider abstraction
-│   ├── RAGService.ts      # Retrieval-augmented generation
-│   ├── MemoryService.ts   # Session memory management
-│   └── PluginService.ts   # Plugin system management
-├── plugins/               # Plugin implementations
-│   ├── WeatherPlugin.ts   # Weather information plugin
-│   ├── MathPlugin.ts      # Mathematical calculations
-│   └── BasePlugin.ts      # Plugin interface
-├── utils/                 # Utility functions
-│   ├── vectorUtils.ts     # Vector operations
-│   ├── textUtils.ts       # Text processing
-│   ├── prepareVectors.ts  # Vector preparation script
-│   └── logger.ts          # Logging utilities
-├── types/                 # TypeScript type definitions
-│   ├── agent.ts          # Agent-related types
-│   ├── rag.ts            # RAG-related types
-│   └── plugin.ts         # Plugin-related types
-├── middleware/            # Express middleware
-│   ├── validation.ts     # Request validation
-│   ├── rateLimit.ts      # Rate limiting
-│   └── errorHandler.ts   # Error handling
-└── data/                 # Static data and knowledge base
-    ├── embeddings.json   # Pre-computed embeddings
-    └── chunks.json       # Text chunks for RAG
-```
-
-## 🚀 Deployment
-
-### Vercel (Recommended)
-```bash
-# Install Vercel CLI
-npm i -g vercel
-
-# Deploy
-vercel --prod
-```
-
-### Railway
-```bash
-# Install Railway CLI
-npm i -g @railway/cli
-
-# Login and deploy
-railway login
-railway deploy
-```
-
-### Render
-1. Connect your GitHub repository
-2. Set environment variables
-3. Deploy automatically
-
-## 🔍 Testing
-
-```bash
-# Test agent endpoint
-curl -X POST http://localhost:3000/api/agent/message \
-  -H "Content-Type: application/json" \
-  -d '{
-    "message": "Explain markdown syntax",
-    "session_id": "test-session"
-  }'
-
-# Test weather plugin
-curl -X POST http://localhost:3000/api/agent/message \
-  -H "Content-Type: application/json" \
-  -d '{
-    "message": "What is the weather in London?", 
-    "session_id": "test-session"
-  }'
-
-# Test math plugin
-curl -X POST http://localhost:3000/api/agent/message \
-  -H "Content-Type: application/json" \
-  -d '{
-    "message": "Calculate 25 * 4 + 10",
-    "session_id": "test-session"
-  }'
-```
-
-## 🎯 Performance Optimization
-
-- **Caching**: LLM responses and embeddings cached in memory
-- **Rate Limiting**: Prevents API abuse
-- **Compression**: Gzip compression for responses
-- **Helmet**: Security headers
-- **Efficient Vector Search**: Optimized cosine similarity implementation
-
-## 📝 License
-
-MIT License - feel free to use for your projects!
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests
-5. Submit a pull request
-
-## 📞 Support
-
-For questions or issues, please create an issue in the repository.
-
----
-
-**Built with ❤️ for the AI Agent Internship Assignment**
