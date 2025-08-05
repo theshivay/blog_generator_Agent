@@ -1,2 +1,7 @@
 sample-md-files
-Internship_Assignment_AI_Agent.md
+knowledge-base
+*.vscode
+*.DS_Store
+.env
+node_modules
+dist
