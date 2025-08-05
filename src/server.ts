@@ -8,6 +8,7 @@ import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 import compression from 'compression';
+import path from 'path';
 import { AgentService } from './services/AgentService';
 import { logger } from './utils/logger';
 
@@ -23,6 +24,9 @@ app.use(cors());
 app.use(compression());
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
+
+// Serve static files from public directory
+app.use(express.static(path.join(__dirname, '../public')));
 
 // Request logging middleware
 app.use((req, _res, next) => {
@@ -163,11 +167,18 @@ async function initializeServices() {
 // ============================================================================
 
 /**
- * Root endpoint - Welcome message
+ * Root endpoint - Serve the UI
  */
 app.get('/', (_req, res) => {
+  res.sendFile(path.join(__dirname, '../public/index.html'));
+});
+
+/**
+ * API info endpoint
+ */
+app.get('/api', (_req, res) => {
   res.json({
-    message: '🤖 AI Agent Server',
+    message: '🤖 AI Agent Server API',
     version: '1.0.0',
     status: 'running',
     endpoints: {
@@ -188,6 +199,29 @@ app.get('/health', (_req, res) => {
     status: 'healthy',
     timestamp: new Date().toISOString(),
     version: '1.0.0'
+  });
+});
+
+/**
+ * List available plugins
+ */
+app.get('/api/plugins', (_req, res) => {
+  res.json({
+    plugins: [
+      {
+        name: 'math',
+        description: 'Perform mathematical calculations and unit conversions',
+        version: '1.0.0',
+        enabled: true
+      },
+      {
+        name: 'weather',
+        description: 'Get weather information for any location',
+        version: '1.0.0',
+        enabled: true
+      }
+    ],
+    total: 2
   });
 });
 

@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Agent Console | Professional Interface</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <div class="brand">
+                    <h1>AI Agent Console</h1>
+                    <p>Groq + Gemini Integration Platform</p>
+                </div>
+                <div class="status-panel">
+                    <div class="status-indicator" id="statusIndicator">
+                        <span class="status-dot"></span>
+                        <span id="statusText">Checking...</span>
+                    </div>
+                    <div class="server-info">
+                        <span>Port 3000</span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Chat Section -->
+            <section class="chat-section">
+                <div class="chat-container">
+                    <div class="chat-header">
+                        <h2>Conversation</h2>
+                        <div class="chat-actions">
+                            <button id="clearChat" class="btn btn-ghost">Clear</button>
+                        </div>
+                    </div>
+                    
+                    <div class="chat-messages" id="chatMessages">
+                        <div class="welcome-message">
+                            <h3>Welcome to AI Agent Console</h3>
+                            <p>Start a conversation with our AI agent. Try these examples:</p>
+                            <div class="example-grid">
+                                <button class="example-card" data-query="Calculate 25 * 4 + 10">
+                                    <span class="example-title">Math Calculation</span>
+                                    <span class="example-desc">25 * 4 + 10</span>
+                                </button>
+                                <button class="example-card" data-query="What's the weather in New York?">
+                                    <span class="example-title">Weather Query</span>
+                                    <span class="example-desc">New York weather</span>
+                                </button>
+                                <button class="example-card" data-query="Explain machine learning">
+                                    <span class="example-title">Knowledge Base</span>
+                                    <span class="example-desc">Explain ML concepts</span>
+                                </button>
+                                <button class="example-card" data-query="Hello, what can you help me with?">
+                                    <span class="example-title">General Chat</span>
+                                    <span class="example-desc">Start conversation</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="chat-input-section">
+                        <div class="input-container">
+                            <textarea id="messageInput" placeholder="Type your message here..." rows="1" maxlength="500"></textarea>
+                            <button id="sendButton" class="btn btn-primary">Send</button>
+                        </div>
+                        <div class="input-footer">
+                            <span id="charCount" class="char-count">0/500</span>
+                            <span class="keyboard-hint">Press Shift+Enter for new line, Enter to send</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Info Panel -->
+            <aside class="info-panel">
+                <!-- Session Info -->
+                <div class="panel-card">
+                    <h3>Session Information</h3>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <label>Session ID</label>
+                            <span id="sessionId" class="mono">-</span>
+                        </div>
+                        <div class="info-item">
+                            <label>Messages</label>
+                            <span id="messageCount">0</span>
+                        </div>
+                        <div class="info-item">
+                            <label>LLM Provider</label>
+                            <span>Groq</span>
+                        </div>
+                        <div class="info-item">
+                            <label>Embeddings</label>
+                            <span>Gemini</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Performance Metrics -->
+                <div class="panel-card">
+                    <h3>Last Response Metrics</h3>
+                    <div class="metrics-grid">
+                        <div class="metric-item">
+                            <label>Response Time</label>
+                            <span id="responseTime" class="metric-value">-</span>
+                        </div>
+                        <div class="metric-item">
+                            <label>Tokens Used</label>
+                            <span id="tokenUsage" class="metric-value">-</span>
+                        </div>
+                        <div class="metric-item">
+                            <label>Plugins</label>
+                            <span id="pluginsUsed" class="metric-value">-</span>
+                        </div>
+                        <div class="metric-item">
+                            <label>Sources</label>
+                            <span id="sourcesUsed" class="metric-value">-</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- API Tools -->
+                <div class="panel-card">
+                    <h3>API Tools</h3>
+                    <div class="tools-grid">
+                        <button class="tool-btn" data-endpoint="/health">
+                            <span>Health Check</span>
+                        </button>
+                        <button class="tool-btn" data-endpoint="/api/plugins">
+                            <span>List Plugins</span>
+                        </button>
+                    </div>
+                </div>
+            </aside>
+        </main>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-container">
+            <div class="loading-spinner"></div>
+            <p>Processing your request...</p>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
