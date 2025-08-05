@@ -111,6 +111,17 @@ body {
     font-weight: 400;
 }
 
+/* Responsive brand text */
+.brand-short,
+.subtitle-short {
+    display: none;
+}
+
+.brand-full,
+.subtitle-full {
+    display: inline;
+}
+
 .status-panel {
     display: flex;
     align-items: center;
@@ -664,6 +675,21 @@ body {
         font-size: 1.25rem;
     }
     
+    .brand p {
+        font-size: 0.8rem;
+    }
+    
+    /* Switch to shorter text on tablet/mobile */
+    .brand-full,
+    .subtitle-full {
+        display: none;
+    }
+    
+    .brand-short,
+    .subtitle-short {
+        display: inline;
+    }
+    
     .status-panel {
         gap: 1rem;
     }
@@ -713,7 +739,22 @@ body {
     }
     
     .brand h1 {
-        font-size: 1.25rem;
+        font-size: 1.1rem;
+    }
+    
+    .brand p {
+        font-size: 0.75rem;
+    }
+    
+    /* Even shorter text for very small screens */
+    .brand-full,
+    .subtitle-full {
+        display: none;
+    }
+    
+    .brand-short,
+    .subtitle-short {
+        display: inline;
     }
     
     .chat-header {
@@ -745,6 +786,41 @@ body {
     .tool-btn {
         width: 100%;
         justify-content: center;
+    }
+}
+
+/* Extra small screens (small phones) */
+@media (max-width: 320px) {
+    .header {
+        padding: 0.5rem;
+    }
+    
+    .brand h1 {
+        font-size: 1rem;
+    }
+    
+    .brand p {
+        font-size: 0.7rem;
+    }
+    
+    .status-panel {
+        gap: 0.5rem;
+    }
+    
+    .theme-btn {
+        width: 32px;
+        height: 32px;
+        font-size: 1rem;
+    }
+    
+    .status-indicator {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.75rem;
+    }
+    
+    .server-info {
+        font-size: 0.65rem;
+        padding: 0.125rem 0.5rem;
     }
 }
 
