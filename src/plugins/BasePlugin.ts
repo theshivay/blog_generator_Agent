@@ -2,10 +2,7 @@
  * Base Plugin Implementation
  * 
  * This file provides the base class and interfaces that all plugins
- * must implement. It defines the standard p      presentation: formattedText ? {
-        formatted_text: formattedText,
-        include_raw_data: false
-      } : undefined,n lifecycle and
+ * must implement. It defines the standard plugin lifecycle and
  * provides common functionality.
  */
 

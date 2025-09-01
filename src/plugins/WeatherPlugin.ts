@@ -9,6 +9,7 @@
 import { PluginContext, PluginResult, WeatherPlugin } from '../types/plugin';
 import { AbstractBasePlugin } from './BasePlugin';
 import { logger } from '../utils/logger';
+import axios from 'axios';
 
 // ============================================================================
 // WEATHER PLUGIN IMPLEMENTATION
@@ -111,13 +112,15 @@ export class WeatherPluginImpl extends AbstractBasePlugin {
       // Format response
       const formattedResponse = this.formatWeatherResponse(weatherData, requestType);
 
-      this.logExecution(input, { success: true } as PluginResult, context);
-
-      return this.createSuccessResult(
+      const result = this.createSuccessResult(
         weatherData,
         formattedResponse,
         Date.now() - startTime
       );
+
+      this.logExecution(input, result, context);
+
+      return result;
 
     } catch (error) {
       logger.error('Weather plugin execution failed', {
@@ -225,13 +228,89 @@ export class WeatherPluginImpl extends AbstractBasePlugin {
     location: string, 
     type: 'current' | 'forecast' | 'historical'
   ): Promise<WeatherPlugin.WeatherData> {
-    if (this.useMockData) {
+    if (this.useMockData || !this.apiKey) {
       return this.generateMockWeatherData(location, type);
     }
 
-    // In a real implementation, you would call the OpenWeatherMap API here
-    // For now, we'll return mock data even when API key is provided
-    return this.generateMockWeatherData(location, type);
+    try {
+      // Real OpenWeatherMap API implementation
+      const baseUrl = 'https://api.openweathermap.org/data/2.5';
+      let url = '';
+      
+      if (type === 'current') {
+        url = `${baseUrl}/weather?q=${encodeURIComponent(location)}&appid=${this.apiKey}&units=metric`;
+      } else if (type === 'forecast') {
+        url = `${baseUrl}/forecast?q=${encodeURIComponent(location)}&appid=${this.apiKey}&units=metric`;
+      }
+
+      const response = await axios.get(url, { timeout: 5000 });
+      return this.parseOpenWeatherResponse(response.data, type);
+      
+    } catch (error) {
+      logger.warn('Failed to fetch from OpenWeather API, using mock data', {
+        error: error instanceof Error ? error.message : 'Unknown error',
+        location
+      });
+      
+      // Fallback to mock data if API fails
+      return this.generateMockWeatherData(location, type);
+    }
+  }
+
+  /**
+   * Parse OpenWeatherMap API response
+   */
+  private parseOpenWeatherResponse(
+    data: any, 
+    type: 'current' | 'forecast' | 'historical'
+  ): WeatherPlugin.WeatherData {
+    const weatherData: WeatherPlugin.WeatherData = {
+      location: {
+        name: data.name || 'Unknown',
+        country: data.sys?.country || 'Unknown'
+      },
+      metadata: {
+        source: 'OpenWeatherMap',
+        last_updated: new Date(),
+        units: 'celsius'
+      }
+    };
+
+    // Add coordinates if available
+    if (data.coord) {
+      weatherData.location.coordinates = {
+        latitude: data.coord.lat,
+        longitude: data.coord.lon
+      };
+    }
+
+    if (type === 'current' && data.main) {
+      weatherData.current = {
+        temperature: Math.round(data.main.temp),
+        feels_like: Math.round(data.main.feels_like),
+        humidity: data.main.humidity,
+        pressure: data.main.pressure,
+        wind_speed: data.wind?.speed ? Math.round(data.wind.speed * 3.6) : 0, // Convert m/s to km/h
+        wind_direction: data.wind?.deg || 0,
+        visibility: data.visibility ? Math.round(data.visibility / 1000) : 10, // Convert m to km
+        uv_index: 0, // UV data requires separate API call
+        condition: data.weather?.[0]?.description || 'Unknown',
+        icon: data.weather?.[0]?.icon || 'unknown'
+      };
+    }
+
+    if (type === 'forecast' && data.list) {
+      weatherData.forecast = data.list.slice(0, 5).map((item: any) => ({
+        date: new Date(item.dt * 1000),
+        high_temp: Math.round(item.main.temp_max),
+        low_temp: Math.round(item.main.temp_min),
+        condition: item.weather?.[0]?.description || 'Unknown',
+        precipitation_chance: Math.round((item.pop || 0) * 100),
+        icon: item.weather?.[0]?.icon || 'unknown'
+      }));
+    }
+
+    return weatherData;
   }
 
   /**
