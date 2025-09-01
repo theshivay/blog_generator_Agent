@@ -66,9 +66,9 @@ async function initializeServices() {
 
     if (groqKey) {
       llmProvider = 'groq';
-      llmModel = 'llama3-70b-8192';
+      llmModel = 'llama-3.1-8b-instant';
       llmApiKey = groqKey;
-      console.log('🦙 Using Groq Llama 3 70B');
+      console.log('🦙 Using Groq llama-3.1-8b-instant');
     } else {
       llmProvider = 'gemini';
       llmModel = 'gemini-pro';

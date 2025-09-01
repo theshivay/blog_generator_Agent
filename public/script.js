@@ -2,7 +2,7 @@
 class AIAgentUI {
     constructor() {
         // this.baseURL = 'http://localhost:3000';
-        this.baseURL = 'https://blog-generator-agent.onrender.com';
+        this.baseURL = 'https://blog-generator-agent-1.onrender.com';
         // this.baseURL = process.env['BASE_URL'];
         this.sessionId = this.generateSessionId();
         this.messageCount = 0;

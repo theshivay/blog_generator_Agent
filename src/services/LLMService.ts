@@ -175,7 +175,7 @@ export class LLMService {
     const url = 'https://api.groq.com/openai/v1/chat/completions';
     
     const payload = {
-      model: request.model || this.config.model || 'llama3-8b-8192',
+      model: request.model || this.config.model || 'llama-3.1-8b-instant',
       messages: request.messages,
       temperature: request.temperature || 0.7,
       max_tokens: request.max_tokens || 1000,
@@ -373,7 +373,7 @@ export class LLMService {
   static getDefaultModel(provider: string): string {
     switch (provider) {
       case 'groq':
-        return 'llama3-8b-8192';
+        return 'llama-3.1-8b-instant';
       case 'gemini':
         return 'gemini-pro';
       default:
